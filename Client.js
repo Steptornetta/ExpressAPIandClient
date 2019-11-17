@@ -1,9 +1,19 @@
+let rowcounter = 0;
+
 function getReservationList()
 {
 	let request = new XMLHttpRequest();
 
 	request.open("GET", "http://127.0.0.1:3000/reservations", true);
 
+	for(i = 0; i < rowcounter; i++)
+	{
+		console.log("Counter " + rowcounter);
+		let tempcheckrow = document.querySelector("#reslistrow");
+		console.log(i)
+		tempcheckrow.remove();
+	}
+	 
 	request.onload = function()
 	{
 		console.log(request.status);
@@ -16,6 +26,7 @@ function getReservationList()
 			for(i = 0; i < data.length; i++)
 			{
 				let resuserrow = document.createElement("tr");
+				resuserrow.setAttribute("id", "reslistrow");
 				let resusername = document.createTextNode(data[i].username);
 
 				let resstartdate = document.createElement("td");
@@ -40,6 +51,8 @@ function getReservationList()
 				document.querySelector("#reservationtable").appendChild(resuserrow);
 
 			}
+
+			rowcounter = data.length;
 			
 		}
 	}
@@ -55,6 +68,32 @@ function getReservation()
 
 	request.open("GET", "http://127.0.0.1:3000/user/"+ username, true);
 	
+	for(i = 0; i < rowcounter; i++)
+	{
+		console.log("Counter " + rowcounter);
+		let tempcheckrow = document.querySelector("#reslistrow");
+		console.log(i)
+		tempcheckrow.remove();
+	}
+	 
+	let checkupdatetable = document.querySelector("#updatetable");
+	if(checkupdatetable != null)
+	{
+		checkupdatetable.remove();
+	}
+		
+	let checkwelcomerow = document.querySelector("#reuserrow");	
+	if(checkwelcomerow!= null)
+	{
+		checkwelcomerow.remove();
+	}
+		
+	let checkerrorrow = document.querySelector("#errorrow");
+	if(checkerrorrow != null)
+	{
+		checkerrorrow.remove();
+	}
+
 
 	request.onload = function()
 	{
@@ -64,8 +103,11 @@ function getReservation()
 			console.log(this.response);
 			if (this.response == "No user found. User added.") 
 			{
+
+
 				let errorrow = document.createElement("tr");
 				let errormessage = document.createTextNode(this.response);
+				errorrow.setAttribute("id", "errorrow");
 				errorrow.appendChild(errormessage);
 				document.querySelector("#welcometable").appendChild(errorrow);
 			}
@@ -75,6 +117,7 @@ function getReservation()
 				let data = JSON.parse(this.response);
 
 				let resuserrow = document.createElement("tr");
+				resuserrow.setAttribute("id", "reuserrow");
 				let resusername = document.createTextNode(data.username);
 
 				let resstartdate = document.createElement("td");
@@ -97,12 +140,94 @@ function getReservation()
 				resuserrow.appendChild(reshours);
 
 				document.querySelector("#welcometable").appendChild(resuserrow);
-			}			
+				
+				let updatetable = document.createElement("table");
+				updatetable.setAttribute("id", "updatetable")
+				updatetable.setAttribute("width", "100%")
+				let updateheader = document.createElement("th");
+				updateheader.style.backgroundColor = "Pink";
+				let updateheaderinfo = document.createTextNode("Update Info");
+
+				updateheader.appendChild(updateheaderinfo);
+
+
+				let newrow = document.createElement("tr");
+
+				let newstartdate = document.createElement("INPUT");
+				newstartdate.setAttribute("type", "text");
+				newstartdate.setAttribute("id", "startdate");
+				newstartdate.value = data.startdate;
+
+				let newstarttime = document.createElement("INPUT");
+				newstarttime.setAttribute("type", "text");
+				newstarttime.setAttribute("id", "starttime");
+
+				newstarttime.value = data.starttime;
+
+
+				let newhours = document.createElement("INPUT");
+				newhours.setAttribute("type", "text");
+				newhours.setAttribute("id", "hours");
+
+				newhours.value = data.hours;
+
+				let updatebutton = document.createElement("INPUT");
+				updatebutton.setAttribute("type", "button");
+				updatebutton.value = "Update";
+				updatebutton.onclick = updateUser;
+
+				newrow.appendChild(newstartdate);
+				newrow.appendChild(newstarttime);
+				newrow.appendChild(newhours);
+				newrow.appendChild(updatebutton);
+
+				document.querySelector("#welcometable").appendChild(updatetable);
+
+				document.querySelector("#updatetable").appendChild(updateheader);
+
+				document.querySelector("#updatetable").appendChild(newrow);
+
+				rowcounter = data.length;			
+
+
+			}
+
 		}
 	}
 
 	request.send();
 
+}
 
+function updateUser()
+{	
+	let username = document.querySelector("#username").value;
+	let newstartdate = document.querySelector("#startdate").value;
+	let newstarttime = document.querySelector("#starttime").value;
+	let newhours = document.querySelector("#hours").value;
+	console.log(username);
+	console.log(newstartdate);
+	console.log(newstarttime);
+	console.log(newhours);
 
+	console.log("cat");
+
+	let request = new XMLHttpRequest();
+
+	request.open("POST", "http://127.0.0.1:3000/reservations/" + username +
+	 "/new/startdate=" + newstartdate + "/starttime=" + newstarttime +
+	  "/hours=" + newhours);
+
+	request.onload = function()
+	{
+		console.log(request.status);
+		if(request.status == 200)
+		{
+			//let data = JSON.parse(this.response);
+
+			//rowcounter = data.length;
+		}
+	}
+
+	request.send();
 }

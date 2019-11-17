@@ -62,9 +62,27 @@ app.get('/user/:username', (req, res) =>
 
 });
 
-app.post('/reservations/new', (req, res) => 
+app.post('/reservations/:username/new/startdate=:startdate/starttime=:starttime/hours=:hours', (req, res) => 
 {
-	res.send('');
+	console.log(req.params.username);
+	console.log(req.params.startdate);
+	console.log(req.params.starttime);
+	console.log(req.params.hours);
+	for(i = 0; i < resListInfo.length; i++)
+	{
+		if(resListInfo[i].username == req.params.username)
+		{
+			console.log("cat");
+			resListInfo[i].startdate = req.params.startdate;
+			resListInfo[i].starttime = req.params.starttime;
+			resListInfo[i].hours = req.params.hours;
+			writeResList();		
+			//res.send(JSON.stringify(resListInfo[i]));
+				
+		}
+	}
+
+	res.send('Done');
 });
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`));
