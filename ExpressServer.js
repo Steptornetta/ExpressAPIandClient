@@ -2,14 +2,18 @@ const express = require('express');
 const fs = require('fs');
 const app = express();
 const port = 3000;
+var cors = require('cors');
 
-let resListInfo= [
+app.use(cors());
+
+
+let resListInfo = [
 
 	{
 		username: 'Smith',
-		startdate: '10/12/19',
 		starttime: '0900',
-		hours: 4
+		startdate: '10-12-19',
+		hours: 3
 	},
 
 ];
@@ -17,119 +21,152 @@ let resListInfo= [
 let resData = [];
 
 /*
-CORS Error workaround. We can set our server to allow origin control from any souce.
+GET API request. Sends the reservation list to the client.
 */
-app.use(function(req, res, next) {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-    next();
-});
-
-app.get('/', (req, res) => 
-{
-	res.send("HomePage");
-});
-
 app.get('/reservations', (req, res) => 
 {
-	tempResList = getResList();
-	//console.log(JSON.stringify(tempResList))
-	res.send(JSON.stringify(tempResList));
+	console.log("GET RESERVATION LIST REQUEST");
+	resListInfo = getResList();
+	//console.log(resListInfo);
+	res.send(JSON.stringify(resListInfo));
 });
 
+/*
+GET API request. Sends a specific user reservation to client. Also adds a user to the file.
+*/
 app.get('/user/:username', (req, res) =>
 {
-	let tempResList = getResList();
-	//console.log(JSON.stringify(tempResList))
-	for(i = 0; i < tempResList.length; i++)
+	console.log("GET USER REQUEST");
+	let resListInfo = getResList();
+	for(i = 0; i < resListInfo.length; i++)
 	{
-		if(tempResList[i].username == req.params.username)
+		if(resListInfo[i].username == req.params.username)
 		{
-			res.send(JSON.stringify(tempResList[i]));
+			res.send(JSON.stringify(resListInfo[i]));
 			break;
 		}
-		else if(i+1 == tempResList.length)
+		else if(i+1 == resListInfo.length)
 		{
 			addUser(req.params.username);
 			res.send("No user found. User added.");
 			break;
 		}
-		else if(tempResList.length == 0)
+		else if(resListInfo.length == 0)
 		{
 			addUser(req.params.username);
+			res.send('No Data. List Created');
+			break;
 		}
 	}
 
 });
 
+
+/*
+POST API request. Updates a users information.
+*/
 app.post('/reservations/:username/new/startdate=:startdate/starttime=:starttime/hours=:hours', (req, res) => 
 {
+	/*
 	console.log(req.params.username);
 	console.log(req.params.startdate);
 	console.log(req.params.starttime);
 	console.log(req.params.hours);
+	*/
+	console.log("POST REQUEST");
 	for(i = 0; i < resListInfo.length; i++)
 	{
 		if(resListInfo[i].username == req.params.username)
 		{
-			console.log("cat");
 			resListInfo[i].startdate = req.params.startdate;
 			resListInfo[i].starttime = req.params.starttime;
 			resListInfo[i].hours = req.params.hours;
-			writeResList();		
-			//res.send(JSON.stringify(resListInfo[i]));
-				
+			writeResList();						
 		}
 	}
 
 	res.send('Done');
 });
 
-app.listen(port, () => console.log(`Example app listening on port ${port}!`));
 
+/*
+Delete API request. Removes a user from the list.
+*/
+app.delete('/user/:username/delete', function (req, res) {
 
+	for(i = 0; i < resListInfo.length; i++)
+	{
+		if(resListInfo[i].username == req.params.username)
+		{
+			console.log('DELETE REQUEST');
+			resListInfo.splice(i,1);
+			writeResList();
+
+		}
+	}
+});
+
+app.listen(port, () => console.log(`Skateboard Reservation app listening on port ${port}!`));
+
+/*
+Returns file data and stores it to resListInfo
+*/
 function getResList()
 {
 	if(fs.existsSync('reservations.json'))
 	{
 		resData = fs.readFileSync('reservations.json');
+
 	}
 	else
 	{
 		writeResList();
 		resData = fs.readFileSync('reservations.json');
-
 	}
 
 	resListInfo = JSON.parse(resData);
-	//resListInfo = JSON.stringify(resListInfo);
-	console.log(`Reservation: ${JSON.stringify(resListInfo)}`);
+	//console.log(`Reservation: ${JSON.stringify(resListInfo)}`);
 	return resListInfo;
 
 }
 
+/*
+Sorts then writes the list to file
+*/
 function writeResList()
 {
-	fs.writeFile('reservations.json', JSON.stringify(resListInfo), err =>
+	sortList();
+	fs.writeFileSync('reservations.json', JSON.stringify(resListInfo, null, 4), err =>
 	{
 		if (err) throw err;
 		console.log('Saved File');
 	});
 }
 
+/*
+Adds a user to list
+*/
 function addUser(userid)
 {
 	let user = {
-	
+
 		username: userid,
 		startdate: 'none',
-		starttime: 'none',
+		starttime: '2400',
 		hours: 0
 
 	};
 
 	resListInfo.push(user);
-
 	writeResList();
 }
 
+/*
+List sort via starttime
+*/
+function sortList()
+{
+	resListInfo.sort(function(a, b){
+		return a.starttime-b.starttime;
+	});
+}

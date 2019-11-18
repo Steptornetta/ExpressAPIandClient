@@ -1,1 +1,20 @@
-[{"username":"Smith","startdate":"October 1","starttime":"0200","hours":"2"},{"username":"Steve","startdate":"July 5","starttime":"0500","hours":"5"},{"username":"steve","startdate":"June 2","starttime":"0800","hours":"5"},{"username":"Jones","startdate":"none","starttime":"none","hours":0},{"username":"hgf","startdate":"none","starttime":"none","hours":0},{"username":"fff","startdate":"none","starttime":"none","hours":0},{"username":"Bob","startdate":"none","starttime":"none","hours":0},{"username":"Louie","startdate":"none","starttime":"none","hours":0},{"username":"Tom","startdate":"none","starttime":"none","hours":0},{"username":"Frad","startdate":"none","starttime":"none","hours":0},{"username":"Frank","startdate":"none","starttime":"none","hours":0},{"username":"Ted","startdate":"none","starttime":"none","hours":0},{"username":"asdasd","startdate":"none","starttime":"none","hours":0},{"username":"ga","startdate":"none","starttime":"none","hours":0},{"username":"tr","startdate":"none","starttime":"none","hours":0},{"username":"set","startdate":"none","starttime":"none","hours":0},{"username":"ggg","startdate":"none","starttime":"none","hours":0},{"username":"John","startdate":"January 2","starttime":"0800","hours":"45"}]
+[
+    {
+        "username": "Jones",
+        "startdate": "none",
+        "starttime": "0200",
+        "hours": "0"
+    },
+    {
+        "username": "Smith",
+        "starttime": "0900",
+        "startdate": "10-12-19",
+        "hours": 3
+    },
+    {
+        "username": "Drake",
+        "startdate": "none",
+        "starttime": "1700",
+        "hours": "0"
+    }
+]
