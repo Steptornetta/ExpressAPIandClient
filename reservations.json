@@ -1,20 +1,20 @@
 [
     {
-        "username": "Jones",
-        "startdate": "none",
-        "starttime": "0200",
-        "hours": "0"
+        "username": "Steve",
+        "startdate": "2019-10-1",
+        "starttime": "2400",
+        "hours": 0
     },
     {
-        "username": "Smith",
-        "starttime": "0900",
-        "startdate": "10-12-19",
-        "hours": 3
+        "username": "Jake",
+        "startdate": "2019-10-1",
+        "starttime": "2400",
+        "hours": 0
     },
     {
-        "username": "Drake",
-        "startdate": "none",
-        "starttime": "1700",
-        "hours": "0"
+        "username": "Lewis",
+        "startdate": "2019-10-1",
+        "starttime": "2400",
+        "hours": 0
     }
 ]

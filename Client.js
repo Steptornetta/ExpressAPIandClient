@@ -1,6 +1,5 @@
 let rowcounter = 0; // needed to keep track of how many rows are created in the Reservation List
 
-
 /*
 Gets the entire reservation list and formats into a HTML table.
 */
@@ -74,6 +73,7 @@ function getReservation()
 
 	request.onload = function()
 	{
+		console.log(request.status);
 
 		if(request.status == 200)
 		{
@@ -82,12 +82,14 @@ function getReservation()
 			// catch the case if a user is not stored. Automatically add the user.
 			if (this.response == "No user found. User added.") 
 			{
+				let data = null;
 				rowcounter++;
 				let errorrow = document.createElement("tr");
 				let errormessage = document.createTextNode(this.response);
 				errorrow.setAttribute("id", "errorrow");
 				errorrow.appendChild(errormessage);
 				document.querySelector("#welcometable").appendChild(errorrow);
+				createUpdateTable(data);
 			}
 
 			else
@@ -119,54 +121,7 @@ function getReservation()
 
 				document.querySelector("#welcometable").appendChild(resuserrow);
 				
-				// create a HTML table that allows our user to update parameters of a user
-				let updatetable = document.createElement("table");
-				updatetable.setAttribute("id", "updatetable")
-				updatetable.setAttribute("width", "100%")
-				let updateheader = document.createElement("th");
-				updateheader.style.backgroundColor = "Pink";
-				let updateheaderinfo = document.createTextNode("Update Info");
-
-				updateheader.appendChild(updateheaderinfo);
-
-				let newrow = document.createElement("tr");
-
-				let newstartdate = document.createElement("INPUT");
-				newstartdate.setAttribute("type", "text");
-				newstartdate.setAttribute("id", "startdate");
-				newstartdate.value = data.startdate;
-
-				let newstarttime = document.createElement("INPUT");
-				newstarttime.setAttribute("type", "text");
-				newstarttime.setAttribute("id", "starttime");
-
-				newstarttime.value = data.starttime;
-
-				let newhours = document.createElement("INPUT");
-				newhours.setAttribute("type", "text");
-				newhours.setAttribute("id", "hours");
-
-				newhours.value = data.hours;
-
-				let updatebutton = document.createElement("INPUT"); //creates our update button
-				updatebutton.setAttribute("type", "button");
-				updatebutton.value = "Update";
-				updatebutton.onclick = updateUser;
-
-				let deletebutton = document.createElement("INPUT"); // creates our delete button
-				deletebutton.setAttribute("type", "button");
-				deletebutton.value = "Delete";
-				deletebutton.onclick = removeUser;
-
-				newrow.appendChild(newstartdate);
-				newrow.appendChild(newstarttime);
-				newrow.appendChild(newhours);
-				newrow.appendChild(updatebutton);
-				newrow.appendChild(deletebutton);
-
-				document.querySelector("#welcometable").appendChild(updatetable);
-				document.querySelector("#updatetable").appendChild(updateheader);
-				document.querySelector("#updatetable").appendChild(newrow);
+				createUpdateTable(data);
 
 				rowcounter = data.length;			
 
@@ -179,13 +134,82 @@ function getReservation()
 
 }
 
+
+
+function createUpdateTable(data)
+{
+	let newstartdate = document.createElement("INPUT");
+	let newstarttime = document.createElement("INPUT");
+	let newhours = document.createElement("INPUT");
+
+	if(data == null)
+	{
+		let newdate = new Date();
+		newdate = newdate.getFullYear() + "-" + newdate.getMonth() + "-" + newdate.getDay();	
+		newstartdate.value = newdate;
+		newstarttime.value = "2400";
+		newhours.value = 0;
+
+	}
+	else
+	{
+		newstartdate.value = data.startdate;
+		newstarttime.value = data.starttime;
+		newhours.value = data.hours;
+
+	}
+	// create a HTML table that allows our user to update parameters of a user
+	let updatetable = document.createElement("table");
+	updatetable.setAttribute("id", "updatetable")
+	updatetable.setAttribute("width", "100%")
+	let updateheader = document.createElement("th");
+	updateheader.style.backgroundColor = "Pink";
+	let updateheaderinfo = document.createTextNode("Update Info");
+
+	updateheader.appendChild(updateheaderinfo);
+
+	let newrow = document.createElement("tr");
+
+	newstartdate.setAttribute("type", "text");
+	newstartdate.setAttribute("id", "startdate");
+
+	newstarttime.setAttribute("type", "text");
+	newstarttime.setAttribute("id", "starttime");
+
+
+	newhours.setAttribute("type", "text");
+	newhours.setAttribute("id", "hours");
+
+
+	let updatebutton = document.createElement("INPUT"); //creates our update button
+	updatebutton.setAttribute("type", "button");
+	updatebutton.value = "Update";
+	updatebutton.onclick = updateUser;
+
+	let deletebutton = document.createElement("INPUT"); // creates our delete button
+	deletebutton.setAttribute("type", "button");
+	deletebutton.value = "Delete";
+	deletebutton.onclick = removeUser;
+
+	newrow.appendChild(newstartdate);
+	newrow.appendChild(newstarttime);
+	newrow.appendChild(newhours);
+	newrow.appendChild(updatebutton);
+	newrow.appendChild(deletebutton);
+
+	document.querySelector("#welcometable").appendChild(updatetable);
+	document.querySelector("#updatetable").appendChild(updateheader);
+	document.querySelector("#updatetable").appendChild(newrow);	
+}
 /*
 Updating parameters of a User and sending it to the server via URL
 */
 function updateUser()
 {	
+	console.log("hello");
 	let username = document.querySelector("#username").value;
 	let newstartdate = document.querySelector("#startdate").value;
+	console.log(newstartdate);
 	let teststartdate = '';
 	let newstarttime = document.querySelector("#starttime").value;
 	let newhours = document.querySelector("#hours").value;
@@ -198,7 +222,6 @@ function updateUser()
 	*/
 	for(let i = 0; i < newstartdate.length; i++)
 	{
-		console.log(i)
 		if(newstartdate.charAt(i) == '/')
 		{
 
@@ -215,7 +238,7 @@ function updateUser()
 
 	let request = new XMLHttpRequest();
 
-	request.open("POST", "http://127.0.0.1:3000/reservations/" + username +
+	request.open("PUT", "http://127.0.0.1:3000/reservations/" + username +
 	 "/new/startdate=" + newstartdate + "/starttime=" + newstarttime +
 	  "/hours=" + newhours);
 
@@ -268,7 +291,7 @@ function removeResList()
 		{
 			break;
 		}
-		console.log(i)
+		//console.log(i)
 		tempcheckrow.remove();
 	}	
 

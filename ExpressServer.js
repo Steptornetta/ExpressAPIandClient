@@ -6,18 +6,7 @@ var cors = require('cors');
 
 app.use(cors());
 
-
-let resListInfo = [
-
-	{
-		username: 'Smith',
-		starttime: '0900',
-		startdate: '10-12-19',
-		hours: 3
-	},
-
-];
-
+let resListInfo = [];
 let resData = [];
 
 /*
@@ -63,9 +52,9 @@ app.get('/user/:username', (req, res) =>
 
 
 /*
-POST API request. Updates a users information.
+PUT API request. Updates a users information.
 */
-app.post('/reservations/:username/new/startdate=:startdate/starttime=:starttime/hours=:hours', (req, res) => 
+app.put('/reservations/:username/new/startdate=:startdate/starttime=:starttime/hours=:hours', (req, res) => 
 {
 	/*
 	console.log(req.params.username);
@@ -73,7 +62,9 @@ app.post('/reservations/:username/new/startdate=:startdate/starttime=:starttime/
 	console.log(req.params.starttime);
 	console.log(req.params.hours);
 	*/
-	console.log("POST REQUEST");
+	resListInfo = getResList();
+
+	console.log("PUT REQUEST");
 	for(i = 0; i < resListInfo.length; i++)
 	{
 		if(resListInfo[i].username == req.params.username)
@@ -81,11 +72,12 @@ app.post('/reservations/:username/new/startdate=:startdate/starttime=:starttime/
 			resListInfo[i].startdate = req.params.startdate;
 			resListInfo[i].starttime = req.params.starttime;
 			resListInfo[i].hours = req.params.hours;
-			writeResList();						
+			writeResList();	
+			res.send('Done');
+			break;
+
 		}
 	}
-
-	res.send('Done');
 });
 
 
@@ -120,6 +112,19 @@ function getResList()
 	}
 	else
 	{
+		// I used Smith as a placeholder first entry if a new file needs to be created. 
+		let mydate = new Date();
+		mydate = mydate.getFullYear() + "-" + mydate.getMonth() + "-" + mydate.getDay();
+		resListInfo = [
+
+			{
+				username: 'Smith',
+				startdate: mydate,
+				starttime: '0700',
+				hours: 3
+			},
+
+		];		
 		writeResList();
 		resData = fs.readFileSync('reservations.json');
 	}
@@ -135,12 +140,13 @@ Sorts then writes the list to file
 */
 function writeResList()
 {
-	sortList();
+	sortList(); //Definitely a hard choice to decide where/when to sort. This option probably puts alot of strain on the server, but works fine for this case.
 	fs.writeFileSync('reservations.json', JSON.stringify(resListInfo, null, 4), err =>
 	{
 		if (err) throw err;
 		console.log('Saved File');
 	});
+
 }
 
 /*
@@ -148,11 +154,13 @@ Adds a user to list
 */
 function addUser(userid)
 {
+	let newdate = new Date();
+	newdate = newdate.getFullYear() + "-" + newdate.getMonth() + "-" + newdate.getDay();
 	let user = {
 
 		username: userid,
-		startdate: 'none',
-		starttime: '2400',
+		startdate: newdate,
+		starttime: "2400",
 		hours: 0
 
 	};
@@ -162,11 +170,83 @@ function addUser(userid)
 }
 
 /*
-List sort via starttime
+List sort via starttime && startdate. It took me a while to figure out a good way to do this because I was storing dates as "12-12-12" and sorting dates is challenging because it
+	is not just a number compare. I settled with splicing each component into a variable and created two new Date objects. I then added them to a array and leveraged the comparability
+	of the two objects via a sort. Finally, if the dates are equal, we do a much more simple sort via time. Objects are sorted in ascending order.
 */
 function sortList()
 {
-	resListInfo.sort(function(a, b){
-		return a.starttime-b.starttime;
+
+	resListInfo.sort(function(a,b)
+	{
+		let testdatea = a.startdate;
+		let ayear = '';
+		let amonth = '';
+		let aday = '';
+
+		let testdateb = b.startdate;
+		let byear = '';
+		let bmonth = '';
+		let bday = '';
+
+		ayear = a.startdate.split("-", 1);
+		testdatea = testdatea.replace(ayear+ "-", "");
+
+		amonth = testdatea.split("-", 1);
+		testdatea = testdatea.replace(amonth+ "-", "");
+
+		aday = testdatea;
+
+		testdatea = new Date(ayear, amonth, aday);
+
+		//console.log(testdatea);
+		//console.log("A: YEAR " + ayear + "MONTH " + amonth + "DAY " + aday)
+
+		byear = b.startdate.split("-", 1);
+		testdateb = testdateb.replace(byear+ "-", "");
+
+		bmonth = testdateb.split("-", 1);
+		testdateb = testdateb.replace(bmonth+ "-", "");
+
+		bday = testdateb;
+
+		testdateb = new Date(byear, bmonth, bday);
+
+		//console.log(testdateb)
+		//console.log("B: YEAR " + byear + "MONTH " + bmonth + "DAY " + bday)
+
+		let datearray = [testdatea, testdateb]
+		let datecompare = 0;
+
+		datearray.sort(function(a,b)
+		{
+			datecompare = b-a
+			return b-a
+		});
+
+		if(datecompare < 0 )
+		{
+			return 1;	
+		}
+		if(datecompare > 0)
+		{
+			return -1;
+		}
+		else //need to account for time if the two dates are equal
+		{
+			if(a.starttime - b.starttime < 0)
+			{
+				return -1;
+			}
+			if(a.starttime - b.starttime > 0)
+			{
+				return 1;
+			}
+			else
+			{
+				return 0;
+			}
+
+		}
 	});
 }
